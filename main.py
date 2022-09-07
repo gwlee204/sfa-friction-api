@@ -32,4 +32,4 @@ if __name__ == "__main__":
     if 'upload' not in os.listdir(DATA_DIR):
         os.mkdir(UPLOAD_DIR)
 
-    uvicorn.run("main:app", host="0.0.0.0", port=42152, reload=True, access_log=True)
+    uvicorn.run("main:app", host="0.0.0.0", port=42154, reload=True, access_log=True)
