@@ -1,5 +1,6 @@
 import os
 from fastapi import FastAPI
+from status import status
 
 
 app = FastAPI()
@@ -13,7 +14,13 @@ UPLOAD_DIR = os.path.join(DATA_DIR, 'upload/')
 
 @app.get("/")
 async def main():
-    return {"hello": "world"}
+    try:
+        if len(os.listdir(UPLOAD_DIR)) == 0:
+            return status(1000)
+        ret = {'files': os.listdir(UPLOAD_DIR)}
+        return status(200, ret)
+    except:
+        return status(1001)
 
 
 if __name__ == "__main__":

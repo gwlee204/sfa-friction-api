@@ -28,13 +28,14 @@ def get_error_msg(code: int):
         str: 에러 코드에 대한 메세지를 리턴한다.
     """
     ERROR_MSG = {   # 에러 메세지 dictionary. key(int)에는 에러 코드가, value(str)에는 에러 메세지가 포함된다.
-
+        1000: "Upload 디렉토리에 파일 없음",
+        1001: "Main 함수 에러, Upload 디렉토리 패스 확인 필요",
     }
 
     return ERROR_MSG[code]
 
 
-def status(code: int, ret):
+def status(code: int, ret=''):
     """API의 response를 리턴하는 함수.
     code 규칙 정리 : status_code.md
 
