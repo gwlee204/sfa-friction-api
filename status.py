@@ -30,6 +30,10 @@ def get_error_msg(code: int):
     ERROR_MSG = {   # 에러 메세지 dictionary. key(int)에는 에러 코드가, value(str)에는 에러 메세지가 포함된다.
         1000: "Upload 디렉토리에 파일 없음",
         1001: "Main 함수 에러, Upload 디렉토리 패스 확인 필요",
+        2000: "Upload 에러, 업로드된 파일의 데이터를 읽을 수 없음",
+        2001: "Upload 에러, 업로드된 파일과 동일한 이름의 파일이 있음",
+        2002: "Upload 에러, 업로드된 파일의 형식이 csv가 아님",
+        2003: "Upload 에러, 업로드된 파일을 저장할 수 없음",
     }
 
     return ERROR_MSG[code]

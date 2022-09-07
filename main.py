@@ -1,5 +1,5 @@
 import os
-from fastapi import FastAPI
+from fastapi import FastAPI, File, UploadFile
 from status import status
 
 
@@ -21,6 +21,28 @@ async def main():
         return status(200, ret)
     except:
         return status(1001)
+
+
+@app.post("/upload/")
+async def create_upload_file(file: UploadFile = File()):
+    try:
+        data = await file.read()
+    except:
+        return status(2000)
+    
+    if file.filename in os.listdir(UPLOAD_DIR):
+        return status(2001)
+
+    if file.filename[-4:] != '.csv':
+        return status(2002)
+        
+    file_location = os.path.join(UPLOAD_DIR, file.filename)
+    try:
+        with open(file_location, "wb+") as file_object:
+            file_object.write(data)
+        return status(200)
+    except:
+        return status(2003)
 
 
 if __name__ == "__main__":
