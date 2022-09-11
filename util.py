@@ -32,7 +32,7 @@ class FrictionAnalyzer():
         for idx in range(0, len(self.raw_bimorph)):
             if self.raw_bimorph.iloc[idx] > np.mean(np.abs(self.raw_bimorph)):
                 test_list = self.raw_bimorph.iloc[idx:idx+cycle_time_datapoints]
-                start_idx = idx + np.where(test_list == np.max(test_list))[0][0]
+                start_idx = idx + np.where(test_list == np.min(test_list))[0][0]
                 break
         self.wave_division = [i for i in range(start_idx, len(self.raw_bimorph), cycle_time_datapoints)]
         self.num_cycle = min(len(self.wave_division)-1, 100)
@@ -65,3 +65,16 @@ class FrictionAnalyzer():
             cycle_loads = self.raw_load.iloc[trace_starting_idx:trace_ending_idx]
             ret_val.append((max(cycle_loads) + min(cycle_loads))*CAL_LOAD/2)
         self.load = ret_val
+        return ret_val
+
+    def friction_force(self):
+        ret_val = []
+        friction_list = self.raw_friction.values.tolist()
+        for cycle_idx in range(0, 100):
+            cycle_frictions = friction_list[self.wave_division[cycle_idx]:self.wave_division[cycle_idx+1]]
+            cut = self.cuts[cycle_idx]
+            first_mean = abs(np.mean(cycle_frictions[cut[0]+cut[1]:500]))
+            second_mean = abs(np.mean(cycle_frictions[500+cut[0]+cut[1]:]))
+            friction_mean = (first_mean + second_mean) * CAL_FRIC / 2
+            ret_val.append(friction_mean)
+        return ret_val
