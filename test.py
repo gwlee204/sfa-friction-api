@@ -8,3 +8,6 @@ print(test_analyzer.wave_division)
 
 test_analyzer.wave_cut()
 print(test_analyzer.cuts)
+
+print(test_analyzer.load_force())
+print(test_analyzer.friction_force())

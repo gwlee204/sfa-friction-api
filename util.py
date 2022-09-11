@@ -35,12 +35,13 @@ class FrictionAnalyzer():
                 start_idx = idx + np.where(test_list == np.min(test_list))[0][0]
                 break
         self.wave_division = [i for i in range(start_idx, len(self.raw_bimorph), cycle_time_datapoints)]
-        self.num_cycle = min(len(self.wave_division)-1, 100)
-        self.wave_division = self.wave_division[1:self.num_cycle]
+        self.num_division = min(len(self.wave_division)-1, 101)
+        self.wave_division = self.wave_division[1:self.num_division]
+        self.num_cycle = len(self.wave_division) - 1
 
     def wave_cut(self):
         self.cuts = []
-        for cycle_idx in range(0, self.num_cycle - 1):
+        for cycle_idx in range(0, self.num_cycle):
             start_idx = self.wave_division[cycle_idx]
             end_idx = self.wave_division[cycle_idx + 1]
 
@@ -70,7 +71,7 @@ class FrictionAnalyzer():
     def friction_force(self):
         ret_val = []
         friction_list = self.raw_friction.values.tolist()
-        for cycle_idx in range(0, 100):
+        for cycle_idx in range(0, self.num_cycle):
             cycle_frictions = friction_list[self.wave_division[cycle_idx]:self.wave_division[cycle_idx+1]]
             cut = self.cuts[cycle_idx]
             first_mean = abs(np.mean(cycle_frictions[cut[0]+cut[1]:500]))
