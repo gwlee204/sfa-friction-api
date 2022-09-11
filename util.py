@@ -26,6 +26,7 @@ class FrictionAnalyzer():
         for idx in range(0, len(self.raw_bimorph)):
             if self.raw_bimorph.iloc[idx] > np.mean(np.abs(self.raw_bimorph)):
                 test_list = self.raw_bimorph.iloc[idx:idx+cycle_time_datapoints]
-                start_idx = np.where(test_list == np.max(test_list))[0][0]
+                start_idx = idx + np.where(test_list == np.max(test_list))[0][0]
                 break
         self.wave_division = [i for i in range(start_idx, len(self.raw_bimorph), cycle_time_datapoints)]
+        self.wave_division = self.wave_division[1:min(len(self.wave_division)-1, 100)]
