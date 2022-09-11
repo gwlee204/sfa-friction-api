@@ -35,8 +35,8 @@ class FrictionAnalyzer():
                 start_idx = idx + np.where(test_list == np.min(test_list))[0][0]
                 break
         self.wave_division = [i for i in range(start_idx, len(self.raw_bimorph), cycle_time_datapoints)]
-        self.num_division = min(len(self.wave_division)-1, 101)
-        self.wave_division = self.wave_division[1:self.num_division]
+        self.num_division = min(len(self.wave_division), 101)
+        self.wave_division = self.wave_division[0:self.num_division]
         self.num_cycle = len(self.wave_division) - 1
 
     def wave_cut(self):
