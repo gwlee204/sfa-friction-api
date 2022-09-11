@@ -17,6 +17,9 @@ class FrictionAnalyzer():
         self.raw_load = f[2]
         self.raw_bimorph = f[3]
 
+        self.wave_divide()
+        self.wave_cut()
+
     def wave_divide(self):
         cycle_time_sec = 20
         data_interval = 20
