@@ -79,3 +79,15 @@ class FrictionAnalyzer():
             friction_mean = (first_mean + second_mean) * CAL_FRIC / 2
             ret_val.append(friction_mean)
         return ret_val
+
+    def friction_coefficient(self):
+        frictions = self.friction_force()
+        loads = self.load_force()
+
+        ret_val = []
+        for cycle_num in range(0, self.num_cycle):
+            ret_val.append({
+                'cycle': cycle_num,
+                'friction-coefficient': round(frictions[cycle_num] / loads[cycle_num], 4)
+            })
+        return ret_val

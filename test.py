@@ -11,3 +11,4 @@ print(test_analyzer.cuts)
 
 print(test_analyzer.load_force())
 print(test_analyzer.friction_force())
+print(test_analyzer.friction_coefficient())
