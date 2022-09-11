@@ -7,6 +7,9 @@ BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 DATA_DIR = os.path.join(BASE_DIR, 'data/')
 UPLOAD_DIR = os.path.join(DATA_DIR, 'upload/')
 
+CAL_LOAD = 139.3
+CAL_FRIC = 15.0
+
 
 class FrictionAnalyzer():
     def __init__(self, filename: str) -> None:
@@ -32,11 +35,12 @@ class FrictionAnalyzer():
                 start_idx = idx + np.where(test_list == np.max(test_list))[0][0]
                 break
         self.wave_division = [i for i in range(start_idx, len(self.raw_bimorph), cycle_time_datapoints)]
-        self.wave_division = self.wave_division[1:min(len(self.wave_division)-1, 100)]
+        self.num_cycle = min(len(self.wave_division)-1, 100)
+        self.wave_division = self.wave_division[1:self.num_cycle]
 
     def wave_cut(self):
         self.cuts = []
-        for cycle_idx in range(0, len(self.wave_division)-1):
+        for cycle_idx in range(0, self.num_cycle - 1):
             start_idx = self.wave_division[cycle_idx]
             end_idx = self.wave_division[cycle_idx + 1]
 
@@ -52,3 +56,12 @@ class FrictionAnalyzer():
                     second_cut = i - 500
                     break
             self.cuts.append([first_cut, second_cut])
+
+    def load_force(self):
+        ret_val = []
+        for cycle_idx in range(0, self.num_cycle):
+            trace_starting_idx = self.wave_division[cycle_idx]
+            trace_ending_idx = self.wave_division[cycle_idx+1]
+            cycle_loads = self.raw_load.iloc[trace_starting_idx:trace_ending_idx]
+            ret_val.append((max(cycle_loads) + min(cycle_loads))*CAL_LOAD/2)
+        self.load = ret_val
