@@ -65,7 +65,7 @@ class FrictionAnalyzer():
             trace_ending_idx = self.wave_division[cycle_idx+1]
             cycle_loads = self.raw_load.iloc[trace_starting_idx:trace_ending_idx]
             ret_val.append((max(cycle_loads) + min(cycle_loads))*CAL_LOAD/2)
-        self.load = ret_val
+        self.loads = ret_val
         return ret_val
 
     def friction_force(self):
@@ -78,17 +78,15 @@ class FrictionAnalyzer():
             second_mean = abs(np.mean(cycle_frictions[500+cut[0]+cut[1]:]))
             friction_mean = (first_mean + second_mean) * CAL_FRIC / 2
             ret_val.append(friction_mean)
+        self.frictions = ret_val
         return ret_val
 
     def friction_coefficient(self):
-        frictions = self.friction_force()
-        loads = self.load_force()
-
         ret_val = []
         for cycle_num in range(0, self.num_cycle):
             ret_val.append({
                 'cycle': cycle_num,
-                'friction-coefficient': round(frictions[cycle_num] / loads[cycle_num], 4)
+                'friction-coefficient': round(self.frictions[cycle_num] / self.loads[cycle_num], 4)
             })
         return ret_val
 
@@ -102,3 +100,9 @@ class FrictionAnalyzer():
                 trace_value = round((self.raw_friction.iloc[trace_starting_idx + time_idx]-vertical_shift) * 15, 4)
                 return_value.append({'cycle': str(cycle_idx), 'time': time_idx, 'trace_value': trace_value})
         return return_value
+
+    def forces(self):
+        return_list = []
+        for cycle_num in range(0, 100):
+            return_list.append({'cycle': cycle_num, 'friction-force': round(self.frictions[cycle_num], 4), 'load-force': round(self.loads[cycle_num], 4)})
+        return return_list
