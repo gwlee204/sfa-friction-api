@@ -38,6 +38,7 @@ def get_error_msg(code: int):
         3001: "Trace 에러, early trace 실행 중 에러",
         3002: "Trace 에러, long trace 실행 중 에러",
         3003: "Forces 에러, force 분석 실행 중 에러",
+        3004: "Friction coefficient 에러, Friction coefficient 분석 실행 중 에러",
     }
 
     return ERROR_MSG[code]

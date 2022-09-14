@@ -73,22 +73,23 @@ async def forces(file_name):
     if file_name in os.listdir(UPLOAD_DIR):
         try:
             friction_analyzer = FrictionAnalyzer(file_name)
-            
-            try:
-                friction_analyzer.load_force()
-            except:
-                return status(3004)
-
-            try:
-                friction_analyzer.friction_force()
-            except:
-                return status(3005)
-
             return friction_analyzer.forces()
         except:
             return status(3003)
     else:
         return status(3000)
+
+@app.get("/{file_name}/friction-coefficient")
+async def file_result(file_name: str):
+    if file_name in os.listdir(UPLOAD_DIR):
+        try:
+            friction_analyzer = FrictionAnalyzer(file_name)
+            return friction_analyzer.friction_coefficient()
+        except:
+            return status(3004)
+    else:
+        return status(3000)
+
 
 if __name__ == "__main__":
     import uvicorn
