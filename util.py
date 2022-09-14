@@ -96,9 +96,14 @@ class FrictionAnalyzer():
             trace_starting_idx = self.wave_division[cycle_idx]+int(self.cuts[cycle_idx][0])
             trace_ending_idx = self.wave_division[cycle_idx+1]+int(self.cuts[cycle_idx][1])
             vertical_shift = self.raw_friction.iloc[trace_starting_idx]
-            for time_idx in range(trace_ending_idx - trace_starting_idx):
-                trace_value = round((self.raw_friction.iloc[trace_starting_idx + time_idx]-vertical_shift) * 15, 4)
-                return_value.append({'cycle': str(cycle_idx), 'time': time_idx, 'trace_value': trace_value})
+            if start != end:
+                for time_idx in range(trace_ending_idx - trace_starting_idx):
+                    trace_value = round((self.raw_friction.iloc[trace_starting_idx + time_idx]-vertical_shift) * 15, 4)
+                    return_value.append({'cycle': str(cycle_idx), 'time': time_idx, 'trace_value': trace_value})
+            else:
+                for time_idx in range(trace_ending_idx - trace_starting_idx):
+                    trace_value = round((self.raw_friction.iloc[trace_starting_idx + time_idx]-vertical_shift) * 15, 4)
+                    return_value.append({'time': time_idx, 'trace_value': trace_value})
         return return_value
 
     def forces(self):
