@@ -114,3 +114,29 @@ class FrictionAnalyzer():
         for cycle_num in range(0, 100):
             return_list.append({'cycle': cycle_num, 'friction-force': round(self.frictions[cycle_num], 4), 'load-force': round(self.loads[cycle_num], 4)})
         return return_list
+    
+    def friction_hysteresis(self):
+        friction_list = self.raw_friction.values.tolist()
+        hysteresis_value = []
+
+        for cycle_idx in range(0, self.num_cycle):
+            try:
+                cycle = friction_list[self.wave_division[cycle_idx]:self.wave_division[cycle_idx+1]]
+                cut = self.cuts[cycle_idx]
+
+                hysteresis_max = max(cycle[:500]) - min(cycle[500:])
+                hysteresis_min = min(cycle[int(cut/2):500-int(cut/2)]) - max(cycle[500+int(cut/2):1000-int(cut/2)])
+
+                hysteresis = hysteresis_max - hysteresis_min
+                hysteresis_value.append(hysteresis)
+            except:
+                if len(hysteresis_value) > 0:
+                    hysteresis_value.append(hysteresis_value[-1])
+                else:
+                    hysteresis_value.append(0)
+        
+        return_list = []
+        for cycle_num in range(0, self.num_cycle):
+            return_list.append({'cycle': cycle_num, 'hysteresis': round(hysteresis_value[cycle_num], 4)})
+
+        return return_list

@@ -90,6 +90,17 @@ async def file_result(file_name: str):
     else:
         return status(3000)
 
+@app.get("/{file_name}/hysteresis")
+async def file_result(file_name: str):
+    if file_name in os.listdir(UPLOAD_DIR):
+        try:
+            friction_analyzer = FrictionAnalyzer(file_name)
+            return friction_analyzer.friction_hysteresis()
+        except:
+            return status(3005)
+    else:
+        return status(3000)
+
 
 if __name__ == "__main__":
     import uvicorn
