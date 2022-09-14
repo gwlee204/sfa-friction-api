@@ -37,6 +37,7 @@ def get_error_msg(code: int):
         3000: "Input filename 에러, 파일 이름과 일치하는 파일이 존재하지 않음",
         3001: "Trace 에러, early trace 실행 중 에러",
         3002: "Trace 에러, long trace 실행 중 에러",
+        3003: "Forces 에러, force 분석 실행 중 에러",
     }
 
     return ERROR_MSG[code]
