@@ -46,7 +46,7 @@ async def create_upload_file(file: UploadFile = File()):
         return status(2003)
 
 
-@app.get("{file_name}/early-traces")
+@app.get("/{file_name}/early-traces")
 async def early_trace(file_name):
     if file_name in os.listdir(UPLOAD_DIR):
         try:
