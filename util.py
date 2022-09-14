@@ -125,7 +125,7 @@ class FrictionAnalyzer():
                 cut = self.cuts[cycle_idx]
 
                 hysteresis_max = max(cycle[:500]) - min(cycle[500:])
-                hysteresis_min = min(cycle[int(cut/2):500-int(cut/2)]) - max(cycle[500+int(cut/2):1000-int(cut/2)])
+                hysteresis_min = min(cycle[int(cut[0]):500-int(cut[1])]) - max(cycle[500+int(cut[0]):1000-int(cut[1])])
 
                 hysteresis = hysteresis_max - hysteresis_min
                 hysteresis_value.append(hysteresis)
