@@ -36,6 +36,7 @@ def get_error_msg(code: int):
         2003: "Upload 에러, 업로드된 파일을 저장할 수 없음",
         3000: "Input filename 에러, 파일 이름과 일치하는 파일이 존재하지 않음",
         3001: "Trace 에러, early trace 실행 중 에러",
+        3002: "Trace 에러, long trace 실행 중 에러",
     }
 
     return ERROR_MSG[code]

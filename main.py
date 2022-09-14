@@ -57,6 +57,17 @@ async def early_trace(file_name):
     else:
         return status(3000)
 
+@app.get("/{file_name}/long-traces")
+async def long_trace(file_name):
+    if file_name in os.listdir(UPLOAD_DIR):
+        try:
+            friction_analyzer = FrictionAnalyzer(file_name)
+            return friction_analyzer.friction_trace(10, 100, 10)
+        except:
+            return status(3002)
+    else:
+        return status(3000)
+
 
 if __name__ == "__main__":
     import uvicorn
