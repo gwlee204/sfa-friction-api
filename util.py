@@ -23,6 +23,9 @@ class FrictionAnalyzer():
         self.wave_divide()
         self.wave_cut()
 
+        self.load_force()
+        self.friction_force()
+
     def wave_divide(self):
         cycle_time_sec = 20
         data_interval = 20

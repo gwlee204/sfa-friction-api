@@ -73,6 +73,17 @@ async def forces(file_name):
     if file_name in os.listdir(UPLOAD_DIR):
         try:
             friction_analyzer = FrictionAnalyzer(file_name)
+            
+            try:
+                friction_analyzer.load_force()
+            except:
+                return status(3004)
+
+            try:
+                friction_analyzer.friction_force()
+            except:
+                return status(3005)
+
             return friction_analyzer.forces()
         except:
             return status(3003)
