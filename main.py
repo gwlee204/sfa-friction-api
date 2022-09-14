@@ -1,6 +1,7 @@
 import os
 from fastapi import FastAPI, File, UploadFile
 from status import status
+from util import FrictionAnalyzer
 
 
 app = FastAPI()
@@ -43,6 +44,18 @@ async def create_upload_file(file: UploadFile = File()):
         return status(200)
     except:
         return status(2003)
+
+
+@app.get("{file_name}/early-traces")
+async def early_trace(file_name):
+    if file_name in os.listdir(UPLOAD_DIR):
+        try:
+            friction_analyzer = FrictionAnalyzer(file_name)
+            return friction_analyzer.friction_trace(0, 10, 1)
+        except:
+            return status(3001)
+    else:
+        return status(3000)
 
 
 if __name__ == "__main__":

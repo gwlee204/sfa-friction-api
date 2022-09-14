@@ -34,6 +34,8 @@ def get_error_msg(code: int):
         2001: "Upload 에러, 업로드된 파일과 동일한 이름의 파일이 있음",
         2002: "Upload 에러, 업로드된 파일의 형식이 csv가 아님",
         2003: "Upload 에러, 업로드된 파일을 저장할 수 없음",
+        3000: "Input filename 에러, 파일 이름과 일치하는 파일이 존재하지 않음",
+        3001: "Trace 에러, early trace 실행 중 에러",
     }
 
     return ERROR_MSG[code]
