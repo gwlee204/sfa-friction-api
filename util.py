@@ -7,6 +7,7 @@ from starlette.responses import FileResponse
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 DATA_DIR = os.path.join(BASE_DIR, 'data/')
 UPLOAD_DIR = os.path.join(DATA_DIR, 'upload/')
+RESULT_DIR = os.path.join(DATA_DIR, 'results/')
 
 CAL_LOAD = 139.3
 CAL_FRIC = 15.0
@@ -15,6 +16,11 @@ CAL_FRIC = 15.0
 class FrictionAnalyzer():
     def __init__(self, filename: str) -> None:
         filepath = os.path.join(UPLOAD_DIR, filename)
+
+        if filename not in os.listdir(RESULT_DIR):
+            os.mkdir(os.path.join(RESULT_DIR, filename))
+        self.result_dir = os.path.join(RESULT_DIR, filename)
+
         f = pd.read_csv(filepath, index_col=0, header=None)
         
         self.raw_friction = f[1]
@@ -136,7 +142,7 @@ class FrictionAnalyzer():
             hysteresis_min = min(cycle[first_region[0]:first_region[1]]) - max(cycle[second_region[0]:second_region[1]])
 
             hysteresis = hysteresis_max - hysteresis_min
-            hysteresis_value.append(hysteresis)
+            hysteresis_value.append(hysteresis * CAL_FRIC)
             # except:
             #     if len(hysteresis_value) > 0:
             #         hysteresis_value.append(hysteresis_value[-1])
@@ -144,7 +150,14 @@ class FrictionAnalyzer():
             #         hysteresis_value.append(0)
         
         return_list = []
+        csv_data = []
         for cycle_num in range(0, self.num_cycle):
             return_list.append({'cycle': cycle_num, 'hysteresis': round(hysteresis_value[cycle_num], 4)})
+            csv_data.append(round(hysteresis_value[cycle_num], 4))
+
+        if 'friction-hysteresis.csv' in os.listdir(self.result_dir):
+            os.remove(os.path.join(self.result_dir, 'friction-hysteresis.csv'))
+        df = pd.DataFrame(csv_data)
+        df.to_csv(os.path.join(self.result_dir, 'friction-hysteresis.csv'))
 
         return return_list
