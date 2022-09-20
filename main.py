@@ -51,7 +51,7 @@ async def early_trace(file_name):
     if file_name in os.listdir(UPLOAD_DIR):
         try:
             friction_analyzer = FrictionAnalyzer(file_name)
-            return friction_analyzer.friction_trace(0, 10, 1)
+            return status(200, friction_analyzer.friction_trace(0, 10, 1))
         except:
             return status(3001)
     else:
@@ -62,7 +62,7 @@ async def long_trace(file_name):
     if file_name in os.listdir(UPLOAD_DIR):
         try:
             friction_analyzer = FrictionAnalyzer(file_name)
-            return friction_analyzer.friction_trace(10, 100, 10)
+            return status(200, friction_analyzer.friction_trace(10, 100, 10))
         except:
             return status(3002)
     else:
@@ -73,7 +73,7 @@ async def forces(file_name):
     if file_name in os.listdir(UPLOAD_DIR):
         try:
             friction_analyzer = FrictionAnalyzer(file_name)
-            return friction_analyzer.forces()
+            return status(200, friction_analyzer.forces())
         except:
             return status(3003)
     else:
@@ -84,7 +84,7 @@ async def file_result(file_name: str):
     if file_name in os.listdir(UPLOAD_DIR):
         try:
             friction_analyzer = FrictionAnalyzer(file_name)
-            return friction_analyzer.friction_coefficient()
+            return status(200, friction_analyzer.friction_coefficient())
         except:
             return status(3004)
     else:
@@ -95,7 +95,7 @@ async def file_result(file_name: str):
     if file_name in os.listdir(UPLOAD_DIR):
         try:
             friction_analyzer = FrictionAnalyzer(file_name)
-            return friction_analyzer.friction_hysteresis()
+            return status(200, friction_analyzer.friction_hysteresis())
         except:
             return status(3005)
     else:
