@@ -15,3 +15,5 @@ print(test_analyzer.friction_coefficient())
 
 print(test_analyzer.friction_trace(0, 10))
 print(test_analyzer.friction_trace(10, 100, 10))
+
+print(test_analyzer.friction_hysteresis())
