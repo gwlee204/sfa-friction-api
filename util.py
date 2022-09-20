@@ -127,27 +127,23 @@ class FrictionAnalyzer():
         hysteresis_value = []
 
         for cycle_idx in range(0, self.num_cycle):
-            # try:
-            cycle = friction_list[self.wave_division[cycle_idx]:self.wave_division[cycle_idx+1]]
-            cut = self.cuts[cycle_idx]
-            print(f"------------------------{cycle_idx}------------------------")
-            print(cut)
-            print(cut[0]+cut[1], 500)
-            print(500+cut[0]+cut[1], len(cycle))
+            try:
+                cycle = friction_list[self.wave_division[cycle_idx]:self.wave_division[cycle_idx+1]]
+                cut = self.cuts[cycle_idx]
 
-            first_region = [cut[0]+cut[1], 500]
-            second_region = [500+cut[0]+cut[1], len(cycle)]
+                first_region = [cut[0]+cut[1], 500]
+                second_region = [500+cut[0]+cut[1], len(cycle)]
 
-            hysteresis_max = max(cycle[:500]) - min(cycle[500:])
-            hysteresis_min = min(cycle[first_region[0]:first_region[1]]) - max(cycle[second_region[0]:second_region[1]])
+                hysteresis_max = max(cycle[:500]) - min(cycle[500:])
+                hysteresis_min = min(cycle[first_region[0]:first_region[1]]) - max(cycle[second_region[0]:second_region[1]])
 
-            hysteresis = hysteresis_max - hysteresis_min
-            hysteresis_value.append(hysteresis * CAL_FRIC)
-            # except:
-            #     if len(hysteresis_value) > 0:
-            #         hysteresis_value.append(hysteresis_value[-1])
-            #     else:
-            #         hysteresis_value.append(0)
+                hysteresis = hysteresis_max - hysteresis_min
+                hysteresis_value.append(hysteresis * CAL_FRIC)
+            except:
+                if len(hysteresis_value) > 0:
+                    hysteresis_value.append(hysteresis_value[-1])
+                else:
+                    hysteresis_value.append(0)
         
         return_list = []
         csv_data = []
