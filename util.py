@@ -57,6 +57,9 @@ class FrictionAnalyzer():
 
             friction_list = self.raw_friction.values.tolist()
             cycle_trace = friction_list[start_idx:end_idx]
+            first_cut = 0
+            second_cut = 0
+
             for i in range(1, 500):
                 if cycle_trace[i]*cycle_trace[i+1] < 0:
                     first_cut = i
@@ -103,8 +106,8 @@ class FrictionAnalyzer():
     def friction_trace(self, start, end, interval = 1):
         return_value = []
         for cycle_idx in range(start, end, interval):
-            trace_starting_idx = self.wave_division[cycle_idx]+int(self.cuts[cycle_idx][0])
-            trace_ending_idx = self.wave_division[cycle_idx+1]+int(self.cuts[cycle_idx][1])
+            trace_starting_idx = self.wave_division[cycle_idx]+int((self.cuts[cycle_idx][1] + self.cuts[cycle_idx][0]) / 2)
+            trace_ending_idx = self.wave_division[cycle_idx+1]+int(self.cuts[cycle_idx][0])
             vertical_shift = self.raw_friction.iloc[trace_starting_idx]
             if start != end:
                 for time_idx in range(trace_ending_idx - trace_starting_idx):
