@@ -121,8 +121,16 @@ class FrictionAnalyzer():
 
     def forces(self):
         return_list = []
-        for cycle_num in range(0, 100):
+        csv_data = []
+        for cycle_num in range(0, self.num_cycle):
             return_list.append({'cycle': cycle_num, 'friction-force': round(self.frictions[cycle_num], 4), 'load-force': round(self.loads[cycle_num], 4)})
+            csv_data.append([round(self.frictions[cycle_num], 4), round(self.loads[cycle_num], 4)])
+        
+        if 'forces.csv' in os.listdir(self.result_dir):
+            os.remove(os.path.join(self.result_dir, 'forces.csv'))
+        df = pd.DataFrame(csv_data)
+        df.to_csv(os.path.join(self.result_dir, 'forces.csv'))
+
         return return_list
     
     def friction_hysteresis(self):
