@@ -1,7 +1,7 @@
 import os
 from fastapi import FastAPI, File, UploadFile
 from status import status
-from util import FrictionAnalyzer
+from friction_analyzer import FrictionAnalyzer
 
 
 app = FastAPI()

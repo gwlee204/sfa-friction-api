@@ -1,4 +1,4 @@
-from util import FrictionAnalyzer
+from friction_analyzer import FrictionAnalyzer
 
 
 TEST_DATA = 'test_data.csv'
