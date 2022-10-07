@@ -80,7 +80,7 @@ async def forces(file_name):
         return status(3000)
 
 @app.get("/{file_name}/friction-coefficient")
-async def file_result(file_name: str):
+async def friction_coefficient(file_name: str):
     if file_name in os.listdir(UPLOAD_DIR):
         try:
             friction_analyzer = FrictionAnalyzer(file_name)
@@ -91,7 +91,7 @@ async def file_result(file_name: str):
         return status(3000)
 
 @app.get("/{file_name}/hysteresis")
-async def file_result(file_name: str):
+async def hysteresis(file_name: str):
     if file_name in os.listdir(UPLOAD_DIR):
         try:
             friction_analyzer = FrictionAnalyzer(file_name)
