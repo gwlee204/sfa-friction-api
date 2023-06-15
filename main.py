@@ -15,6 +15,7 @@ UPLOAD_DIR = os.path.join(DATA_DIR, 'upload/')
 
 @app.get("/")
 async def main():
+    # return list of files in upload directory
     try:
         if len(os.listdir(UPLOAD_DIR)) == 0:
             return status(1000)
@@ -26,58 +27,62 @@ async def main():
 
 @app.post("/upload/")
 async def create_upload_file(file: UploadFile = File()):
+    # upload file to upload directory
     try:
         data = await file.read()
     except:
-        return status(2000)
+        return status(2000) # Upload 에러, 업로드된 파일의 데이터를 읽을 수 없음
     
     if file.filename in os.listdir(UPLOAD_DIR):
-        return status(2001)
+        return status(2001) # Upload 에러, 이미 존재하는 파일 이름
 
     if file.filename[-4:] != '.csv':
-        return status(2002)
+        return status(2002) # Upload 에러, csv 파일이 아님
         
     file_location = os.path.join(UPLOAD_DIR, file.filename)
     try:
         with open(file_location, "wb+") as file_object:
             file_object.write(data)
-        return status(200)
+        return status(200)  # Upload 성공
     except:
-        return status(2003)
+        return status(2003) # Upload 에러, 파일 저장 실패
+    
 
-
-@app.get("/{file_name}/early-traces")
-async def early_trace(file_name):
+@app.get("/{file_name}/cycle/{cycle_idx}")
+async def cycle(file_name, cycle_idx):
     if file_name in os.listdir(UPLOAD_DIR):
         try:
             friction_analyzer = FrictionAnalyzer(file_name)
-            return status(200, friction_analyzer.friction_trace(0, 10, 1))
-        except:
-            return status(3001)
-    else:
-        return status(3000)
-
-@app.get("/{file_name}/long-traces")
-async def long_trace(file_name):
-    if file_name in os.listdir(UPLOAD_DIR):
-        try:
-            friction_analyzer = FrictionAnalyzer(file_name)
-            return status(200, friction_analyzer.friction_trace(10, 100, 10))
-        except:
-            return status(3002)
-    else:
-        return status(3000)
-
-@app.get("/{file_name}/forces")
-async def forces(file_name):
-    if file_name in os.listdir(UPLOAD_DIR):
-        try:
-            friction_analyzer = FrictionAnalyzer(file_name)
-            return status(200, friction_analyzer.forces())
+            return status(200, friction_analyzer.divided_data[int(cycle_idx)])
         except:
             return status(3003)
     else:
         return status(3000)
+
+
+@app.get("/{file_name}/friction")
+async def forces(file_name):
+    if file_name in os.listdir(UPLOAD_DIR):
+        try:
+            friction_analyzer = FrictionAnalyzer(file_name)
+            return status(200, friction_analyzer.friction())
+        except:
+            return status(3003)
+    else:
+        return status(3000)
+    
+
+@app.get("/{file_name}/load")
+async def forces(file_name):
+    if file_name in os.listdir(UPLOAD_DIR):
+        try:
+            friction_analyzer = FrictionAnalyzer(file_name)
+            return status(200, friction_analyzer.load())
+        except:
+            return status(3003)
+    else:
+        return status(3000)
+
 
 @app.get("/{file_name}/friction-coefficient")
 async def friction_coefficient(file_name: str):
@@ -89,6 +94,7 @@ async def friction_coefficient(file_name: str):
             return status(3004)
     else:
         return status(3000)
+
 
 @app.get("/{file_name}/hysteresis")
 async def hysteresis(file_name: str):

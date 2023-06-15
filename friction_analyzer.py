@@ -16,107 +16,100 @@ class FrictionAnalyzer():
     def __init__(self, filename: str) -> None:
         filepath = os.path.join(UPLOAD_DIR, filename)
 
+        # Create result directory
+        if 'results' not in os.listdir(DATA_DIR):
+            os.mkdir(RESULT_DIR)
         if filename not in os.listdir(RESULT_DIR):
             os.mkdir(os.path.join(RESULT_DIR, filename))
         self.result_dir = os.path.join(RESULT_DIR, filename)
 
-        f = pd.read_csv(filepath, index_col=0, header=None)
+        # Load data
+        f = pd.read_csv(filepath, header=None)
         
-        self.raw_friction = f[1]
-        self.raw_load = f[2]
+        self.raw_time = f[0]
+        self.raw_friction = np.round(f[1] * CAL_FRIC, 3)
+        self.raw_load = np.round(f[2] * CAL_LOAD, 3)
         self.raw_bimorph = f[3]
 
-        self.wave_divide()
-        self.wave_cut()
+        self.start_point()
+        self.divide_cycle()
 
-        self.load_force()
-        self.friction_force()
+    def start_point(self):
+        # Find start point
+        max_bimorph = np.max(self.raw_bimorph[0:1000])
+        max_bimorph_idx = np.where(self.raw_bimorph == max_bimorph)[0][0]
 
-    def wave_divide(self):
-        cycle_time_sec = 20
-        data_interval = 20
+        self.start_idx = max_bimorph_idx
 
-        cycle_time_datapoints = int(1000 / data_interval * cycle_time_sec)
+    def divide_cycle(self):
+        # Divide cycle
+        self.divided_friction = []
+        self.divided_load = []
+        for i in range(self.start_idx, len(self.raw_friction) - 1010, 1000):
+            self.divided_friction.append(self.raw_friction[i:i + 1010].reset_index(drop=True))
+            self.divided_load.append(self.raw_load[i:i + 1010].reset_index(drop=True))
+        
+        self.divided_data = []
+        for i in range(len(self.divided_friction)):
+            self.divided_data.append({
+                'friction': self.divided_friction[i],
+                'load': self.divided_load[i]
+            })
 
-        for idx in range(0, len(self.raw_bimorph)):
-            if self.raw_bimorph.iloc[idx] > np.mean(np.abs(self.raw_bimorph)):
-                test_list = self.raw_bimorph.iloc[idx:idx+cycle_time_datapoints]
-                start_idx = idx + np.where(test_list == np.min(test_list))[0][0]
-                break
-        self.wave_division = [i for i in range(start_idx, len(self.raw_bimorph), cycle_time_datapoints)]
-        self.num_division = min(len(self.wave_division), 101)
-        self.wave_division = self.wave_division[0:self.num_division]
-        self.num_cycle = len(self.wave_division) - 1
+    def load(self):
+        divided_loads = self.divided_load
+        
+        loads = []
+        for i in range(len(divided_loads)):
+            max_load = np.max(np.abs(divided_loads[i]))
+            min_load = np.min(np.abs(divided_loads[i]))
 
-    def wave_cut(self):
-        self.cuts = []
-        for cycle_idx in range(0, self.num_cycle):
-            start_idx = self.wave_division[cycle_idx]
-            end_idx = self.wave_division[cycle_idx + 1]
+            load_mean = round((max_load + min_load) / 2, 2)
+            loads.append(load_mean)
 
-            friction_list = self.raw_friction.values.tolist()
-            cycle_trace = friction_list[start_idx:end_idx]
-            first_cut = 0
-            second_cut = 0
+        self.loads = loads
 
-            for i in range(1, 500):
-                if cycle_trace[i]*cycle_trace[i+1] < 0:
-                    first_cut = i
+        return loads
+    
+    def friction(self):
+        divided_frictions = self.divided_friction
+        cut_off_idxs = []
+
+        for i in range(len(divided_frictions)):
+            abs_slope = np.abs(np.diff(divided_frictions[i], 1))
+            smoothed_abs_slope = np.convolve(abs_slope, np.ones(10) / 10, mode='same')
+            mean_abs_slope = np.mean(abs_slope)
+
+            for i in range(10, 500):
+                if smoothed_abs_slope[i] > mean_abs_slope:
+                    pass
+                else:
+                    cut_off_idxs.append(i)
                     break
-            
-            for i in range(500, 1000):
-                if cycle_trace[i-1]*cycle_trace[i] < 0:
-                    second_cut = i - 500
-                    break
-            self.cuts.append([first_cut, second_cut])
+        
+        frictions = []
+        for i in range(len(divided_frictions)):
+            first_friction_mean = np.mean(np.abs(divided_frictions)[i][cut_off_idxs[i]:500])
+            second_friction_mean = np.mean(np.abs(divided_frictions)[i][500 + cut_off_idxs[i]:1000])
 
-    def load_force(self):
-        ret_val = []
-        for cycle_idx in range(0, self.num_cycle):
-            trace_starting_idx = self.wave_division[cycle_idx]
-            trace_ending_idx = self.wave_division[cycle_idx+1]
-            cycle_loads = self.raw_load.iloc[trace_starting_idx:trace_ending_idx]
-            ret_val.append((max(cycle_loads) + min(cycle_loads))*CAL_LOAD/2)
-        self.loads = ret_val
-        return ret_val
+            friction_mean = round((first_friction_mean + second_friction_mean) / 2, 2)
+            frictions.append(friction_mean)
 
-    def friction_force(self):
-        ret_val = []
-        friction_list = self.raw_friction.values.tolist()
-        for cycle_idx in range(0, self.num_cycle):
-            cycle_frictions = friction_list[self.wave_division[cycle_idx]:self.wave_division[cycle_idx+1]]
-            cut = self.cuts[cycle_idx]
-            first_mean = abs(np.mean(cycle_frictions[cut[0]+cut[1]:500]))
-            second_mean = abs(np.mean(cycle_frictions[500+cut[0]+cut[1]:]))
-            friction_mean = (first_mean + second_mean) * CAL_FRIC / 2
-            ret_val.append(friction_mean)
-        self.frictions = ret_val
-        return ret_val
+        self.frictions = frictions
+
+        return frictions
 
     def friction_coefficient(self):
+        self.load()
+        self.friction()
+
         ret_val = []
-        for cycle_num in range(0, self.num_cycle):
+        for cycle_num in range(0, min(len(self.divided_load), len(self.divided_friction))):
             ret_val.append({
                 'cycle': cycle_num,
                 'friction-coefficient': round(self.frictions[cycle_num] / self.loads[cycle_num], 4)
             })
         return ret_val
-
-    def friction_trace(self, start, end, interval = 1):
-        return_value = []
-        for cycle_idx in range(start, end, interval):
-            trace_starting_idx = self.wave_division[cycle_idx]+int((self.cuts[cycle_idx][1] + self.cuts[cycle_idx][0]) / 2)
-            trace_ending_idx = self.wave_division[cycle_idx+1]+int(self.cuts[cycle_idx][0])
-            vertical_shift = self.raw_friction.iloc[trace_starting_idx]
-            if start != end:
-                for time_idx in range(trace_ending_idx - trace_starting_idx):
-                    trace_value = round((self.raw_friction.iloc[trace_starting_idx + time_idx]-vertical_shift) * 15, 4)
-                    return_value.append({'cycle': str(cycle_idx), 'time': time_idx, 'trace_value': trace_value})
-            else:
-                for time_idx in range(trace_ending_idx - trace_starting_idx):
-                    trace_value = round((self.raw_friction.iloc[trace_starting_idx + time_idx]-vertical_shift) * 15, 4)
-                    return_value.append({'time': time_idx, 'trace_value': trace_value})
-        return return_value
 
     def forces(self):
         return_list = []
@@ -133,37 +126,26 @@ class FrictionAnalyzer():
         return return_list
     
     def friction_hysteresis(self):
-        friction_list = self.raw_friction.values.tolist()
-        hysteresis_value = []
+        divided_frictions = self.divided_friction
+        cut_off_idxs = []
 
-        for cycle_idx in range(0, self.num_cycle):
-            try:
-                cycle = friction_list[self.wave_division[cycle_idx]:self.wave_division[cycle_idx+1]]
-                cut = self.cuts[cycle_idx]
+        for i in range(len(divided_frictions)):
+            abs_slope = np.abs(np.diff(divided_frictions[i], 1))
+            smoothed_abs_slope = np.convolve(abs_slope, np.ones(10) / 10, mode='same')
+            mean_abs_slope = np.mean(abs_slope)
 
-                first_region = [cut[0]+cut[1], 500]
-                second_region = [500+cut[0]+cut[1], len(cycle)]
-
-                hysteresis_max = max(cycle[:500]) - min(cycle[500:])
-                hysteresis_min = min(cycle[first_region[0]:first_region[1]]) - max(cycle[second_region[0]:second_region[1]])
-
-                hysteresis = hysteresis_max - hysteresis_min
-                hysteresis_value.append(hysteresis * CAL_FRIC)
-            except:
-                if len(hysteresis_value) > 0:
-                    hysteresis_value.append(hysteresis_value[-1])
+            for i in range(10, 500):
+                if smoothed_abs_slope[i] > mean_abs_slope:
+                    pass
                 else:
-                    hysteresis_value.append(0)
+                    cut_off_idxs.append(i)
+                    break
         
-        return_list = []
-        csv_data = []
-        for cycle_num in range(0, self.num_cycle):
-            return_list.append({'cycle': cycle_num, 'hysteresis': round(hysteresis_value[cycle_num], 4)})
-            csv_data.append(round(hysteresis_value[cycle_num], 4))
+        friction_hysteresis = []
+        for i in range(len(divided_frictions)):
+            min_gap = np.min(np.abs(divided_frictions)[i][cut_off_idxs[i]:500]) + np.min(np.abs(divided_frictions)[i][cut_off_idxs[i]:500])
+            max_gap = np.max(np.abs(divided_frictions)[i][cut_off_idxs[i]:500]) + np.max(np.abs(divided_frictions)[i][cut_off_idxs[i]:500])
 
-        if 'friction-hysteresis.csv' in os.listdir(self.result_dir):
-            os.remove(os.path.join(self.result_dir, 'friction-hysteresis.csv'))
-        df = pd.DataFrame(csv_data)
-        df.to_csv(os.path.join(self.result_dir, 'friction-hysteresis.csv'))
+            friction_hysteresis.append(round((max_gap - min_gap) / max_gap, 4))
 
-        return return_list
+        return friction_hysteresis
